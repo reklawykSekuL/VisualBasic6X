@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+    <?include "Variables.wxi" ?>
+
+    <Fragment>
+
+        <Property Id="DEVENV12">
+            <RegistrySearch Type="file" Id="FindVS12" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\12.0\Setup\VS" Name="EnvironmentPath" Win64="no">
+                <FileSearch Name="devenv.exe" />
+            </RegistrySearch>
+        </Property>
+
+        <Property Id="DEVENV12LICENSE">
+            <RegistrySearch Type="raw" Id="FindVS12License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\12.0\professional" Name="Install"/>
+            <!--<RegistrySearch Type="raw" Id="FindVS12License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\12.0\premium" Name="Install"/>
+            <RegistrySearch Type="raw" Id="FindVS12License" Root="HKLM" Win64="no" Key="SOFTWARE\Microsoft\DevDiv\vs\Servicing\12.0\ultimate" Name="Install"/>-->
+            
+            <!-- 1028, 1029, 1031, 1033, 1036, 1040, 1041, 1042, 1045, 1046, 1049, 1055, 2052, 3082 -->
+        </Property>
+
+        <Feature Id="VisualStudio12Feature" Title="Visual Studio 2013 Integration" Level="0">
+            <ComponentGroupRef Id="VisualStudio12Components" />
+            <Condition Level="1">DEVENV12 AND DEVENV12LICENSE</Condition>
+        </Feature>
+
+        <ComponentGroup Id="VisualStudio12Components" Directory="INSTALLFOLDER">
+            <Component Id="VisualStudio12Extension">
+                <RegistryKey Root="HKCU" Key="Software\Microsoft\VisualStudio\12.0">
+                    <?include "Registration.wxi" ?>
+                </RegistryKey>
+            </Component>
+        </ComponentGroup>
+
+        <CustomAction Id="VS12Setup" Property="DEVENV12" ExeCommand="/setup" Execute="deferred" Return="ignore" Impersonate="no" />
+        <InstallExecuteSequence>
+            <Custom Action="VS12Setup" Before="InstallFinalize">DEVENV12 AND DEVENV12LICENSE</Custom>
+        </InstallExecuteSequence>
+        <UI>
+            <ProgressText Action="ExecuteVS12Setup">Registering in Visual Studio 2013...</ProgressText>
+        </UI>
+    </Fragment>
+</Wix>
